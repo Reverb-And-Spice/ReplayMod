@@ -825,16 +825,16 @@ public class ReplaySerializer
 
                         var ext = ReplayAPI.Extensions.FirstOrDefault(ex => ex.FrameExtensionId == extensionId);
 
-                        if (ext != null && ext.Enabled.Value)
-                        {
-                            ext.OnReadFrame(br, frame, subIndex);
-                        } 
-                        else
-                        {
-                            uint len = br.ReadUInt32();
-                            br.BaseStream.Position += len;
-                        }
+                        long lengthPosition = br.BaseStream.Position;
+                        int len = br.ReadInt32();
+                        long end = br.BaseStream.Position + len;
 
+                        br.BaseStream.Position = lengthPosition;
+                        
+                        if (ext != null && ext.Enabled.Value)
+                            ext.OnReadFrame(br, frame, subIndex);
+
+                        br.BaseStream.Position = end;
                         break;
                     }
 
@@ -890,7 +890,7 @@ public class ReplaySerializer
         Action<T, TField, ushort, BinaryReader> readField
     ) where TField : Enum
     {
-        uint len = br.ReadUInt32();
+        int len = br.ReadInt32();
         long end = br.BaseStream.Position + len;
 
         T state = ctor();
@@ -913,8 +913,6 @@ public class ReplaySerializer
 
             br.BaseStream.Position = fieldEnd;
         }
-
-        br.BaseStream.Position = end;
 
         return state;
     }
