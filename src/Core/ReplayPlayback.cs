@@ -64,7 +64,6 @@ public class ReplayPlayback
 
     public bool hasPaused;
     public bool isPaused;
-    public float previousPlaybackSpeed = 1f;
     
     // Roots
     public GameObject ReplayRoot;
@@ -1372,7 +1371,7 @@ public class ReplayPlayback
         effect.transform.localRotation = localRotation;
 
         var visualEffect = effect.GetComponent<VisualEffect>();
-        visualEffect.playRate = Abs(playbackSpeed);
+        visualEffect.playRate = isPaused ? 0f : Abs(playbackSpeed);
         visualEffect.resetSeedOnPlay = false;
         visualEffect.startSeed = (uint)Random.Range(1, int.MaxValue);
 
@@ -1471,7 +1470,7 @@ public class ReplayPlayback
             hitmarker.SetDamage(fx.damage);
             hitmarker.gameObject.SetActive(true);
             hitmarker.Play();
-            hitmarker.GetComponent<VisualEffect>().playRate = Abs(playbackSpeed);
+            hitmarker.GetComponent<VisualEffect>().playRate = isPaused ? 0f : Abs(playbackSpeed);
         }
 
         if (ReplayCache.FXToSFXName.TryGetValue(fx.fxType, out string audioName) 
@@ -1506,20 +1505,15 @@ public class ReplayPlayback
             if (Main.instance.EnableHaptics.Value)
                 Main.LocalPlayer.Controller.PlayerHaptics.PlayControllerHaptics(1f, 0.05f, 1f, 0.05f);
 
-            if (setSpeed)
-                SetPlaybackSpeed(previousPlaybackSpeed);
         }
         else
         {
-            previousPlaybackSpeed = playbackSpeed;
 
             AudioManager.instance.Play(ReplayCache.SFX["Call_DressingRoom_PartPanelTick_ForwardUnlocked"], Main.instance.head.position);
 
             if (Main.instance.EnableHaptics.Value)
                 Main.LocalPlayer.Controller.PlayerHaptics.PlayControllerHaptics(1f, 0.05f, 1f, 0.05f);
 
-            if (setSpeed) 
-                SetPlaybackSpeed(0f);
         }
 
         ReplayAPI.ReplayPauseChangedInternal(active);
@@ -1577,14 +1571,9 @@ public class ReplayPlayback
 
     public void AddPlaybackSpeed(float delta, float minSpeed = -8f, float maxSpeed = 8f)
     {
-        TogglePlayback(isPaused && !Approximately(playbackSpeed + delta, 0), false);
         
         float speed = playbackSpeed + delta;
 
-        if (Approximately(speed, 0))
-            TogglePlayback(false);
-        else
-            TogglePlayback(true, false);
         
         speed = Round(speed * 10f) / 10f;
         speed = Clamp(speed, minSpeed, maxSpeed);
@@ -1653,7 +1642,7 @@ public class ReplayPlayback
         {
             if (fx == null) return;
 
-            bool paused = Abs(playbackSpeed) < 0.0001f;
+            bool paused = isPaused || Abs(playbackSpeed) < 0.0001f;
             fx.vfx.pause = paused;
             fx.vfx.playRate = paused ? 1f : Abs(playbackSpeed);
 
@@ -1910,7 +1899,7 @@ public class ReplayPlayback
             if (Abs(VoiceSource.time - localTime) > 0.1f || changedTrack)
                 VoiceSource.time = localTime;
 
-            if (Main.Playback.playbackSpeed == 0f)
+            if (Main.Playback.isPaused || Main.Playback.playbackSpeed == 0f)
             {
                 VoiceSource.Pause();
                 return;
