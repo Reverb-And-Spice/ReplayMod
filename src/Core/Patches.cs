@@ -353,6 +353,10 @@ public class Patches
     {
         static void Postfix(Collider other)
         {
+            // Replay clone stepped on it (shouldn't close park)
+            if (other.GetComponentInParent<ReplayPlayback.Clone>())
+                return;
+            
             // In a replay park
             if (PhotonNetwork.CurrentRoom == null && Main.currentScene == "Park")
                 MelonCoroutines.Start(Utilities.LoadMap(1));

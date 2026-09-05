@@ -176,11 +176,11 @@ public class ReplayPlayback
             HiddenStructures.Add(structure);
         }
 
-        foreach (var fruit in Object.FindObjectsOfType<Fruit>())
-        {
-            fruit.GetComponent<Collider>().enabled = false;
-            fruit.GetComponent<Renderer>().enabled = false;
-        }
+        // foreach (var fruit in Object.FindObjectsOfType<Fruit>())
+        // {
+        //     fruit.GetComponent<Collider>().enabled = false;
+        //     fruit.GetComponent<Renderer>().enabled = false;
+        // }
 
         PlaybackStructures = new GameObject[currentReplay.Header.Structures.Length];
         replayStructures = new GameObject("Replay Structures");
@@ -284,6 +284,15 @@ public class ReplayPlayback
         //     sceneProp.transform.SetParent(scenePropsParent.transform);
         //     replaySceneProps.Add(sceneProp);
         // }
+
+        if (currentReplay.Header.Scene == "Park")
+        {
+            foreach (var tetherball in GameObjects.Park.INTERACTABLES.Toys.TetherBalls.GetGameObject()
+                         .GetComponentsInChildren<SkinnedMeshRenderer>())
+            {
+                tetherball.enabled = true;
+            }
+        }
         
         // --------------
         
@@ -2017,7 +2026,8 @@ public class ReplayPlayback
                 currentFrictionSource?.ReturnToPool();
                 currentFrictionSource = null;
                 
-                currentFrictionVfx?.visualEffect?.Stop();
+                if (currentFrictionVfx != null && currentFrictionVfx.visualEffect != null)
+                    currentFrictionVfx.visualEffect.Stop();
 
                 if (vfxReturnTimer <= 0f && currentFrictionVfx != null)
                 {

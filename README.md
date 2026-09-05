@@ -131,7 +131,7 @@ The documentation for the API is found [here](docs/API/README.md)
 
 **ERROR** - Development of ReplayMod
 
-**TacoSlayer** - UI design help, logo design, and design feedback  
+**TacoSlayer** - UI design help, logo design, design feedback, and the amazing Replay Studio mod
 **Blank** - Help with the binary format, GitHub workflow, voice playback, and design decisions  
 **MatsuNoKi** - UI feedback and design decisions  
 **ContagiousPow** - UI design feedback, testing, and other design decisions  
